@@ -1,0 +1,6 @@
+# outpkg: mocks
+# output: ./mocks
+recursive: True
+inpackage: True
+testonly: False
+keeptree: False

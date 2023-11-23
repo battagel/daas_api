@@ -1,0 +1,14 @@
+apiVersion: k3d.io/v1alpha4
+kind: Simple
+metadata:
+  name: daas
+registries:
+  create:
+    name: registry.localhost
+    host: "0.0.0.0"
+    hostPort: "12345"
+ports:
+  # Expose Redis
+  - port: 6379:6379
+    nodeFilters:
+      - server:0
