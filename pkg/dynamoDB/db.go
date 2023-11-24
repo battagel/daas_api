@@ -1,7 +1,7 @@
 package dynamoDB
 
 import (
-	"daas/internal/logger"
+	"daas_api/pkg/logger"
 	"fmt"
 )
 

@@ -1,8 +1,8 @@
 package db
 
 import (
-	"daas/internal/logger"
-	"daas/internal/phrase"
+	"daas_api/pkg/logger"
+	"daas_api/internal/phrase"
 )
 
 type Database interface {
@@ -67,6 +67,10 @@ func (pdb *PhraseDatabase) GetAllPhrases() ([]phrase.Phrase, error) {
 	rawPhrases, err := pdb.database.GetAll()
 	if err != nil {
 		return nil, err
+	}
+	if len(rawPhrases) < 1 {
+		pdb.logger.Debugln("No phrases found")
+		return nil, nil
 	}
 
 	var phrases []phrase.Phrase

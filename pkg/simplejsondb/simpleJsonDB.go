@@ -1,7 +1,7 @@
 package simplejsondb
 
 import (
-	"daas/internal/logger"
+	"daas_api/pkg/logger"
 	"encoding/json"
 	"errors"
 	"os"

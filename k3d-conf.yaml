@@ -1,7 +1,7 @@
 apiVersion: k3d.io/v1alpha4
 kind: Simple
 metadata:
-  name: daas
+  name: daas_api
 registries:
   create:
     name: registry.localhost

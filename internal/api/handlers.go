@@ -1,7 +1,7 @@
 package api
 
 import (
-	"daas/internal/phrase"
+	"daas_api/internal/phrase"
 	"net/http"
 	"reflect"
 
@@ -15,6 +15,9 @@ func (s *Server) GetAllPhrases(c *gin.Context) {
 		return
 	}
 
+	s.logger.Debugw("Number of phrases",
+		"num", len(foundPhrases),
+	)
 	if len(foundPhrases) == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"error": "No phrases found"})
 		return

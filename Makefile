@@ -6,7 +6,7 @@ K3D_CONF := k3d-conf.yaml
 KUBECTL := kubectl
 DOCKER := docker
 
-NAME := daas
+NAME := daas_api
 VER := latest
 CMD_DIR := $(CURDIR)/cmd
 BIN_DIR := $(CURDIR)/bin
@@ -25,7 +25,7 @@ build: vendor
 
 ## run: Run the binary
 .PHONY: run
-run:
+run: build
 	@$(BIN_DIR)/$(NAME)
 
 ## vendor: Download the vendored dependencies

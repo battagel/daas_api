@@ -1,4 +1,4 @@
-module daas
+module daas_api
 
 go 1.21.0
 

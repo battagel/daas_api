@@ -2,8 +2,8 @@ package api
 
 import (
 	"context"
-	"daas/internal/logger"
-	"daas/internal/phrase"
+	"daas_api/pkg/logger"
+	"daas_api/internal/phrase"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

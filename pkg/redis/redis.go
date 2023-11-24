@@ -2,7 +2,7 @@ package redis
 
 import (
 	"context"
-	"daas/internal/logger"
+	"daas_api/pkg/logger"
 	"encoding/json"
 	"fmt"
 
@@ -78,12 +78,33 @@ func (r *Redis) Get(key string) (map[string]interface{}, error) {
 func (r *Redis) GetAll() ([]map[string]interface{}, error) {
 	keys, err := r.GetKeys()
 	if err != nil {
+		r.logger.Errorw("Error querying from Redis",
+			"error", err,
+		)
 		return nil, err
 	}
+	if len(keys) < 1 {
+		r.logger.Debugln("No keys found")
+		return nil, nil
+	}
+	r.logger.Debugw("Got keys",
+		"keys", keys,
+	)
+
     values, err := r.client.MGet(r.ctx, keys...).Result()
-    if err != nil {
-        return nil, err
-    }
+	if err != nil {
+		if err == redis.Nil {
+			r.logger.Debugw("Keys do not exist",
+				"keys", keys,
+			)
+			return nil, nil
+		}
+		// Other errors
+		r.logger.Errorw("Error querying from Redis",
+			"error", err,
+		)
+		return nil, err
+	}
 
     var result []map[string]interface{}
 

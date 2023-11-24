@@ -21,7 +21,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy the Aegis binary
-COPY --from=builder /build/bin/daas /usr/local/bin/daas
+COPY --from=builder /build/bin/daas_api /usr/local/bin/daas_api
 
 # Copy the Aegis config file
 COPY --from=builder /build/config.env /app/config.env
@@ -33,4 +33,4 @@ WORKDIR /app
 EXPOSE 8080
 
 # Start ClamAV daemon and Aegis
-CMD ["/usr/local/bin/daas"]
+CMD ["/usr/local/bin/daas_api"]
