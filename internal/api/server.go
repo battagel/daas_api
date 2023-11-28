@@ -2,10 +2,11 @@ package api
 
 import (
 	"context"
-	"daas_api/pkg/logger"
 	"daas_api/internal/phrase"
+	"daas_api/pkg/logger"
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,12 +26,23 @@ type Server struct {
 }
 
 func CreateAPIServer(logger logger.Logger, ctx context.Context, addr string, pdb PhraseDatabase) (*Server, error) {
+    // Create a new Gin router
+    router := gin.Default()
+
+    // Apply CORS middleware
+    config := cors.DefaultConfig()
+    config.AllowOrigins = []string{"https://stackoverflow.com", "http://confluence.eng.nimblestorage.com", "https://rndwiki-pro.its.hpecorp.net"}
+    config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE"}
+    config.AllowHeaders = []string{"Content-Type", "Authorization"}
+	config.AllowCredentials = true // Allow credentials in cross-origin requests
+    router.Use(cors.New(config))
+
     return &Server{
-		logger: logger,
-		ctx: ctx,
-        Router: gin.Default(),
-        srv:    &http.Server{Addr: addr, Handler: nil},
-		pdb: pdb,
+        logger: logger,
+        ctx:    ctx,
+        Router: router,
+        srv:    &http.Server{Addr: addr, Handler: router},
+        pdb:    pdb,
     }, nil
 }
 

@@ -55,6 +55,7 @@ func (pdb *PhraseDatabase) GetPhrase(key string) (phrase.Phrase, error) {
 	err = newPhrase.ToPhrase(rawData)
 	if err != nil {
 		pdb.logger.Errorw("Error parsing rawData into new phrase",
+			"err", err,
 			"rawData", rawData,
 		)
 		return phrase.Phrase{}, err
