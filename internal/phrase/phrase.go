@@ -5,44 +5,45 @@ import (
 	"fmt"
 )
 
-
 type Explanation struct {
-    Definition  string   `json:"definition"`
-    Code        []string `json:"code"`
-    References  []string `json:"references"`
+	Definition string   `json:"definition"`
+	Tags       []string `json:"tags"`
+	Code       []string `json:"code"`
+	References []string `json:"references"`
+	Heat	   float64  `json:"heat"`
 }
 
 type Phrase struct {
-    Phrase      string         `json:"phrase"`
-    Terms       []string       `json:"terms"`
-    LastUpdate  string         `json:"last_update"`
-    Relevance   float64        `json:"relevance"`
-    // Accuracy    float64       `json:"accuracy"`
-    Tags         []string      `json:"tags"`
-    Explanations []Explanation `json:"explanations"`
+	Phrase       string        `json:"phrase"`
+	Terms        []string      `json:"terms"`
+	LastUpdate   string        `json:"last_update"`
+	Complexity   float64           `json:"complexity"`
+	Tags         []string      `json:"tags"`
+	Explanations []Explanation `json:"explanations"`
 }
 
 func (p *Phrase) ToMap() map[string]interface{} {
-    phraseMap := make(map[string]interface{})
-    phraseMap["phrase"] = p.Phrase
-    phraseMap["terms"] = p.Terms
-    phraseMap["last_update"] = p.LastUpdate
-    phraseMap["relevance"] = p.Relevance
-    // phraseMap["accuracy"] = p.Accuracy
-    phraseMap["tags"] = p.Tags
+	phraseMap := make(map[string]interface{})
+	phraseMap["phrase"] = p.Phrase
+	phraseMap["terms"] = p.Terms
+	phraseMap["last_update"] = p.LastUpdate
+	phraseMap["complexity"] = p.Complexity
+	phraseMap["tags"] = p.Tags
 
-    // Convert the Explanation slice to a slice of maps
-    explanations := make([]map[string]interface{}, len(p.Explanations))
-    for i, exp := range p.Explanations {
-        explanationMap := make(map[string]interface{})
-        explanationMap["definition"] = exp.Definition
-        explanationMap["code"] = exp.Code
-        explanationMap["references"] = exp.References
-        explanations[i] = explanationMap
-    }
-    phraseMap["explanations"] = explanations
+	// Convert the Explanation slice to a slice of maps
+	explanations := make([]map[string]interface{}, len(p.Explanations))
+	for i, exp := range p.Explanations {
+		explanationMap := make(map[string]interface{})
+		explanationMap["definition"] = exp.Definition
+		explanationMap["tags"] = exp.Tags
+		explanationMap["code"] = exp.Code
+		explanationMap["references"] = exp.References
+		explanationMap["heat"] = exp.Heat
+		explanations[i] = explanationMap
+	}
+	phraseMap["explanations"] = explanations
 
-    return phraseMap
+	return phraseMap
 }
 
 // Turn raw database data into a phrase
@@ -68,19 +69,12 @@ func (p *Phrase) ToPhrase(rawData interface{}) error {
 			return errors.New("Invalid or missing 'last_update' field")
 		}
 
-		// Check and assign "relevance" field
-		if val, ok := data["relevance"].(float64); ok {
-			p.Relevance = val
+		// Check and assign "complexity" field
+		if val, ok := data["complexity"].(float64); ok {
+			p.Complexity = val
 		} else {
-			return errors.New("Invalid or missing 'relevance' field")
+			return errors.New("Invalid or missing 'complexity' field")
 		}
-
-		// // Check and assign "accuracy" field
-		// if val, ok := data["accuracy"].(float64); ok {
-		// 	phrase.Accuracy = int(val)
-		// } else {
-		// 	return errors.New("Invalid or missing 'accuracy' field")
-		// }
 
 		// Check and assign "tag" field
 		p.Tags = toStringSlice(data["tags"].([]interface{}))
@@ -91,8 +85,10 @@ func (p *Phrase) ToPhrase(rawData interface{}) error {
 				if expMap, ok := exp.(map[string]interface{}); ok {
 					explanation := Explanation{
 						Definition: expMap["definition"].(string),
+						Tags:       toStringSlice(expMap["tags"].([]interface{})),
 						Code:       toStringSlice(expMap["code"].([]interface{})),
 						References: toStringSlice(expMap["references"].([]interface{})),
+						Heat: expMap["heat"].(float64),
 					}
 					p.Explanations = append(p.Explanations, explanation)
 				} else {
@@ -113,9 +109,9 @@ func (p *Phrase) ToPhrase(rawData interface{}) error {
 
 // toStringSlice converts an interface{} slice to a []string slice
 func toStringSlice(data []interface{}) []string {
-    result := make([]string, len(data))
-    for i, v := range data {
-        result[i] = v.(string)
-    }
-    return result
+	result := make([]string, len(data))
+	for i, v := range data {
+		result[i] = v.(string)
+	}
+	return result
 }
