@@ -19,7 +19,7 @@ func (s *Server) GetAllPhrases(c *gin.Context) {
 		"num", len(foundPhrases),
 	)
 	if len(foundPhrases) == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "No phrases found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Phrase database empty"})
 		return
 	}
 
@@ -146,6 +146,36 @@ func (s *Server) DeletePhrase(c *gin.Context) {
 }
 
 func (s *Server) BulkImportPhrases(c *gin.Context) {
-	// Implement your code to bulk import items into db
-	// ...
+	// A list of phases.
+	var bulkPhrases []phrase.Phrase
+	if err := c.ShouldBindJSON(&bulkPhrases); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Validate that DB is empty
+	foundPhrases, err := s.pdb.GetAllPhrases()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error querying for all phrases"})
+		return
+	}
+
+	s.logger.Debugw("Number of phrases",
+		"num", len(foundPhrases),
+	)
+	if len(foundPhrases) != 0 {
+		c.JSON(http.StatusConflict, gin.H{"error": "Database must be empty to bulk import"})
+		return
+	}
+
+	for _, phrase := range bulkPhrases {
+		err := s.pdb.AddPhrase(phrase)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to bulk import phrase", "phrase": phrase})
+			return
+		}
+	}
+
+
+	c.JSON(http.StatusCreated, gin.H{"message": "Successfully bulk imported phrases"})
 }

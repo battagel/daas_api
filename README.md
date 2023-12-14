@@ -6,13 +6,9 @@ Redis --Get--> DaaS_api --GET--> Third-party integration --Find--> Highlight wor
 
 ## What needs doing
 
-- PATCH and PUT updates
-
 - Unittest and mocking
 
-- Bulk import
-
-- Bulk delete (confirmation)
+- Bulk delete (confirmation). Can do with FLUSHDB in Redis
 
 - Dockerise
 

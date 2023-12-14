@@ -10,14 +10,14 @@ type Explanation struct {
 	Tags       []string `json:"tags"`
 	Code       []string `json:"code"`
 	References []string `json:"references"`
-	Heat	   float64  `json:"heat"`
+	Heat       float64  `json:"heat"`
 }
 
 type Phrase struct {
 	Phrase       string        `json:"phrase"`
 	Terms        []string      `json:"terms"`
 	LastUpdate   string        `json:"last_update"`
-	Complexity   float64           `json:"complexity"`
+	Complexity   float64       `json:"complexity"`
 	Tags         []string      `json:"tags"`
 	Explanations []Explanation `json:"explanations"`
 }
@@ -29,6 +29,7 @@ func (p *Phrase) ToMap() map[string]interface{} {
 	phraseMap["last_update"] = p.LastUpdate
 	phraseMap["complexity"] = p.Complexity
 	phraseMap["tags"] = p.Tags
+
 
 	// Convert the Explanation slice to a slice of maps
 	explanations := make([]map[string]interface{}, len(p.Explanations))
@@ -88,7 +89,7 @@ func (p *Phrase) ToPhrase(rawData interface{}) error {
 						Tags:       toStringSlice(expMap["tags"].([]interface{})),
 						Code:       toStringSlice(expMap["code"].([]interface{})),
 						References: toStringSlice(expMap["references"].([]interface{})),
-						Heat: expMap["heat"].(float64),
+						Heat:       expMap["heat"].(float64),
 					}
 					p.Explanations = append(p.Explanations, explanation)
 				} else {
