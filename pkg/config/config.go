@@ -10,8 +10,9 @@ type Config struct {
 	LoggerLevel    string `mapstructure:"DAAS_LOGGER_LEVEL"`
 	LoggerEncoding string `mapstructure:"DAAS_LOGGER_ENCODING"`
 	APIAddress     string `mapstructure:"DAAS_API_ADDRESS"`
+	Backend        string `mapstructure:"DAAS_API_BACKEND"`
 
-	RedisAddress string `mapstructure:"REDIS_ADDRESS"`
+	RedisAddress  string `mapstructure:"REDIS_ADDRESS"`
 	RedisPassword string `mapstructure:"REDIS_PASSWORD"`
 }
 

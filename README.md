@@ -6,12 +6,9 @@ Redis --Get--> DaaS_api --GET--> Third-party integration --Find--> Highlight wor
 
 ## What needs doing
 
+- Change database to SQL lite
+- Seperate explanations into seperate table
+- Add JSONB for faster reads in SQL lite
 - Unittest and mocking
-
-- Bulk delete (confirmation). Can do with FLUSHDB in Redis
-
 - Dockerise
-
-- Redis over k3d
-
 - Hosting?

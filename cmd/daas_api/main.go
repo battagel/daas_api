@@ -5,6 +5,7 @@ import (
 	"daas_api/internal/db"
 	"daas_api/pkg/config"
 	"daas_api/pkg/logger"
+	"daas_api/pkg/sqlite"
 	"daas_api/pkg/redis"
 	"os/signal"
 	"context"
@@ -39,13 +40,22 @@ func run() int {
 	defer asyncCancel()
 
 	// # Phrase Database #
-	// Currently working with Redis backend
-	redis, err := redis.CreateRedis(logger, asyncCtx, config.RedisAddress, config.RedisPassword)
-	if err != nil {
-		logger.Errorw("Error creating Redis Database", err)
-		return 1
+	var backend db.Database
+	switch config.Backend {
+	case "redis":
+		backend, err = redis.CreateRedis(logger, asyncCtx, config.RedisAddress, config.RedisPassword)
+		if err != nil {
+			logger.Errorw("Error creating Redis Database", err)
+			return 1
+		}
+	case "sqlite":
+		backend, err = sqlite.CreateSQLite(logger, asyncCtx)
+		if err != nil {
+			logger.Errorw("Error creating Sqlite Database", err)
+			return 1
+		}
 	}
-	pdb, err := db.CreatePhraseDatabase(logger, redis)
+	pdb, err := db.CreatePhraseDatabase(logger, backend)
 	if err != nil {
 		logger.Errorw("Error creating Phrase Database", err)
 		return 1

@@ -4,7 +4,6 @@ import (
 	"context"
 	"daas_api/pkg/logger"
 	"encoding/json"
-	"fmt"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -140,10 +139,12 @@ func (r *Redis) GetKeys() ([]string, error) {
 }
 
 func (r *Redis) Delete(key string) error {
-	val, err := r.client.Del(r.ctx, key).Result()
+	_, err := r.client.Del(r.ctx, key).Result()
 	if err != nil {
 		return err
 	}
-	fmt.Println(val)
+	r.logger.Debugw("Deleted phrase",
+		"phrase", key,
+	)
 	return nil
 }

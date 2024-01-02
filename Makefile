@@ -5,11 +5,13 @@ K3D := k3d
 K3D_CONF := k3d-conf.yaml
 KUBECTL := kubectl
 DOCKER := docker
+MIGRATE := migrate
 
 NAME := daas_api
 VER := latest
 CMD_DIR := $(CURDIR)/cmd
 BIN_DIR := $(CURDIR)/bin
+MIGRATIONS_DIR := $(CURDIR)/pkg/sqlite/migrations
 HELM_DIR := $(CURDIR)/helm
 MAIN_LOCATION := $(CMD_DIR)/$(NAME)/main.go
 
@@ -43,3 +45,9 @@ test:
 .PHONY: mock
 mock:
 	@$(MOCKERY) --dir ./internal -r --all --config .mockery.yaml
+
+## db: delete then recreate the sqlite db
+.PHONY: db
+db:
+	@$(MIGRATE) -path $(MIGRATIONS_DIR) -database sqlite3://database.db down
+	@$(MIGRATE) -path $(MIGRATIONS_DIR) -database sqlite3://database.db up
