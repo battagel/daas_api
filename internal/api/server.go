@@ -5,7 +5,6 @@ import (
 	"daas_api/internal/phrase"
 	"daas_api/pkg/logger"
 	"net/http"
-
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -25,8 +24,11 @@ type Server struct {
 	pdb PhraseDatabase
 }
 
-func CreateAPIServer(logger logger.Logger, ctx context.Context, addr string, pdb PhraseDatabase) (*Server, error) {
+func CreateAPIServer(logger logger.Logger, ctx context.Context, mode string, addr string, pdb PhraseDatabase) (*Server, error) {
     // Create a new Gin router
+    if mode == "release" {
+		gin.SetMode(gin.ReleaseMode)
+	}
     router := gin.Default()
 
     // Apply CORS middleware
@@ -46,22 +48,19 @@ func CreateAPIServer(logger logger.Logger, ctx context.Context, addr string, pdb
     }, nil
 }
 
-func (s *Server) Start(doneChan chan struct{}) {
+func (s *Server) Start() {
     s.srv.Handler = s.Router
-	go func() {
-        select {
-        case <-s.ctx.Done():
-            // The context is canceled, initiate server shutdown
-            err := s.srv.Shutdown(context.Background())
-			if err != nil {
-                s.logger.Errorw("Server shutdown error: %v\n", err)
-			}
-			s.logger.Debugln("Server gracefully shut down")
-			doneChan <- struct{}{} // Notify that we have finished processing
-        }
-    }()
-
     if err := s.srv.ListenAndServe(); err != http.ErrServerClosed {
         s.logger.Errorw("Server error: %v\n", err)
     }
+}
+
+func (s *Server) Stop() error {
+	err := s.srv.Shutdown(s.ctx)
+	if err != nil {
+		s.logger.Errorw("Server shutdown error: %v\n", err)
+		return err
+	}
+	s.logger.Debugln("Server gracefully shut down")
+	return nil
 }

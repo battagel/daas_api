@@ -5,10 +5,13 @@ import (
 	"daas_api/pkg/logger"
 	"database/sql"
 	"encoding/json"
+	"errors"
 
-	_ "github.com/mattn/go-sqlite3"
 	_ "github.com/golang-migrate/migrate/v4"
+	_ "github.com/mattn/go-sqlite3"
 )
+
+type CloseFunc func() error
 
 type SQLite struct {
 	logger logger.Logger
@@ -17,23 +20,39 @@ type SQLite struct {
 	tableName string
 }
 
-func CreateSQLite(logger logger.Logger, ctx context.Context) (*SQLite, error) {
+func CreateSQLite(logger logger.Logger, ctx context.Context, tableName string) (*SQLite, CloseFunc, error) {
 	db, err := sql.Open("sqlite3", "database.db")
 	if err != nil {
 		logger.Errorln("Failed to open SQLite DB")
+		return nil, nil, err
 	}
 
+	// Test connection
 	err = db.Ping()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
+	}
+
+	// Check if table exists
+	rows, err := db.Query(`SELECT name FROM sqlite_master WHERE type='table' AND name=?`, tableName)
+	if err != nil {
+		logger.Errorw("Error querying sqlite for table",
+			"tableName", tableName,
+		)
+	}
+	if !rows.Next() {
+		logger.Errorw("Table does not exist",
+			"tableName", tableName,
+		)
+		return nil, nil, errors.New("SQLite table does not exist. Try running '$ make db'")
 	}
 
 	return &SQLite{
 		logger: logger,
 		db:     db,
 		ctx: ctx,
-		tableName: "phrases",
-	}, nil
+		tableName: tableName,
+	}, db.Close, nil
 }
 
 func (s *SQLite) Insert(key string, jsonValue map[string]interface{}) error {
@@ -45,7 +64,6 @@ func (s *SQLite) Insert(key string, jsonValue map[string]interface{}) error {
 		)
 		return err
 	}
-	s.logger.Debugw("Unmars")
 	_, err = s.db.Exec("INSERT INTO " + s.tableName + " (key, phrase) values(?, ?)", key, string(byteData))
 	if err != nil {
 		s.logger.Errorw("Failed to insert phrase",
@@ -59,26 +77,16 @@ func (s *SQLite) Insert(key string, jsonValue map[string]interface{}) error {
 }
 
 func (s *SQLite) Get(key string) (map[string]interface{}, error) {
-	row, err := s.db.Query(`SELECT id, key, phrase FROM phrases WHERE key = ?`, key)
+	var id sql.NullInt64
+	var returnedKey sql.NullString
+	var returnedJson sql.NullString
+	err := s.db.QueryRow(`SELECT id, key, phrase FROM phrases WHERE key = ?`, key).Scan(&id, &returnedKey, &returnedJson)
 	if err != nil {
 		s.logger.Debugw("Failed to query database",
 			"err", err,
 			"key", key,
 		)
 		return nil, err
-	}
-	defer row.Close()
-
-	var id sql.NullInt64
-	var returnedKey sql.NullString
-	var returnedJson sql.NullString
-	row.Next()
-	err = row.Scan(&id, &returnedKey, &returnedJson)
-	if err != nil {
-		s.logger.Debugw("Phrase not found in query",
-			"key", key,
-		)
-		return nil, nil
 	}
 
 	if !returnedJson.Valid {

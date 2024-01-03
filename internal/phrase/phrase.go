@@ -2,7 +2,6 @@ package phrase
 
 import (
 	"errors"
-	"fmt"
 )
 
 type Explanation struct {
@@ -104,7 +103,6 @@ func (p *Phrase) ToPhrase(rawData interface{}) error {
 		return errors.New("Unexpected type for rawData")
 	}
 
-	fmt.Println(p)
 	return nil
 }
 

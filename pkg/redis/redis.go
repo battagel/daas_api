@@ -4,9 +4,12 @@ import (
 	"context"
 	"daas_api/pkg/logger"
 	"encoding/json"
+	"sync"
 
 	"github.com/redis/go-redis/v9"
 )
+
+type CloseFunc func() error
 
 type Redis struct {
 	logger logger.Logger
@@ -14,7 +17,7 @@ type Redis struct {
 	ctx context.Context
 }
 
-func CreateRedis(logger logger.Logger, ctx context.Context, address string, password string) (*Redis, error){
+func CreateRedis(logger logger.Logger, ctx context.Context, address string, password string) (*Redis, CloseFunc, error){
 	client := redis.NewClient(&redis.Options{
 		Addr:     address,
 		Password: password,
@@ -23,13 +26,26 @@ func CreateRedis(logger logger.Logger, ctx context.Context, address string, pass
 	status, err := client.Ping(ctx).Result()
     if (err != nil || status != "PONG") {
         logger.Errorln("Redis connection was refused")
-		return nil, err
+		return nil, nil, err
     }
 	return &Redis{
 		logger: logger,
 		client: client,
 		ctx: ctx,
-	}, nil
+	}, client.Close, nil
+}
+
+func (r *Redis) Start(wg *sync.WaitGroup) {
+	defer wg.Done()
+	select {
+	case <-r.ctx.Done():
+		err := r.client.Close();
+		if err != nil {
+			r.logger.Errorln("Failed to close Redis")
+		}
+		r.logger.Debugln("Redis gracefully shut down")
+		return
+	}
 }
 
 func (r *Redis) Insert(key string, jsonValue map[string]interface{}) error {

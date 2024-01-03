@@ -1,8 +1,8 @@
 package db
 
 import (
-	"daas_api/pkg/logger"
 	"daas_api/internal/phrase"
+	"daas_api/pkg/logger"
 )
 
 type Database interface {

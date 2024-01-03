@@ -9,11 +9,14 @@ import (
 type Config struct {
 	LoggerLevel    string `mapstructure:"DAAS_LOGGER_LEVEL"`
 	LoggerEncoding string `mapstructure:"DAAS_LOGGER_ENCODING"`
+	APIMode        string `mapstructure:"DAAS_API_MODE"`
 	APIAddress     string `mapstructure:"DAAS_API_ADDRESS"`
-	Backend        string `mapstructure:"DAAS_API_BACKEND"`
+	// Backend        string `mapstructure:"DAAS_API_BACKEND"`
 
 	RedisAddress  string `mapstructure:"REDIS_ADDRESS"`
 	RedisPassword string `mapstructure:"REDIS_PASSWORD"`
+
+	SQLiteTableName string `mapstructure:"SQLITE_TABLE_NAME"`
 }
 
 var vp *viper.Viper

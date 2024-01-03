@@ -2,9 +2,12 @@
 .idea
 *.log
 tmp/
+/bin/
 /build/
 /vendor/
 /helm/aegis/charts/
 /examples/
 /data/
 /mocks/*.go
+/data_processing/
+*.db

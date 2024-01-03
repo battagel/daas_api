@@ -1,30 +1,39 @@
 package main
 
 import (
+	"context"
 	"daas_api/internal/api"
 	"daas_api/internal/db"
 	"daas_api/pkg/config"
 	"daas_api/pkg/logger"
 	"daas_api/pkg/sqlite"
-	"daas_api/pkg/redis"
-	"os/signal"
-	"context"
 	"fmt"
 	"os"
+	"os/signal"
 )
 
-func run() int {
+type exitCode int
+
+const (
+	exitOK     exitCode = 0
+	exitError  exitCode = 1
+	exitCancel exitCode = 2
+	exitAuth   exitCode = 4
+)
+
+
+func run() exitCode {
 	// ### Initialisation and Configuration ###
 	config, err := config.GetConfig()
 	if err != nil {
 		fmt.Println("Error getting config", err)
-		return 1
+		return exitError
 	}
 	// cli.PrintSplash(config.LoggerEncoding)
 	logger, err := logger.CreateZapLogger(config.LoggerLevel, config.LoggerEncoding)
 	if err != nil {
 		fmt.Println("Error creating logger", err)
-		return 1
+		return exitError
 	}
 
 	// ### Start Program ###
@@ -40,64 +49,51 @@ func run() int {
 	defer asyncCancel()
 
 	// # Phrase Database #
-	var backend db.Database
-	switch config.Backend {
-	case "redis":
-		backend, err = redis.CreateRedis(logger, asyncCtx, config.RedisAddress, config.RedisPassword)
-		if err != nil {
-			logger.Errorw("Error creating Redis Database", err)
-			return 1
-		}
-	case "sqlite":
-		backend, err = sqlite.CreateSQLite(logger, asyncCtx)
-		if err != nil {
-			logger.Errorw("Error creating Sqlite Database", err)
-			return 1
-		}
+	backend, backendClose, err := sqlite.CreateSQLite(logger, asyncCtx, config.SQLiteTableName)
+	if err != nil {
+		logger.Errorw("Error creating Sqlite Database", err)
+		return exitError
 	}
+	defer backendClose()
 	pdb, err := db.CreatePhraseDatabase(logger, backend)
 	if err != nil {
 		logger.Errorw("Error creating Phrase Database", err)
-		return 1
+		return exitError
 	}
 
 	// # API Server #
-	// Go gin
-	server, err := api.CreateAPIServer(logger, asyncCtx, config.APIAddress, pdb)
+	server, err := api.CreateAPIServer(logger, asyncCtx, config.APIMode, config.APIAddress, pdb)
 	if err != nil {
 		logger.Errorw("Error creating API server", err)
-		return 1
+		return exitError
 	}
 	server.InitializeRoutes()
 
 	// ### Main Loop ###
-	errChan := make(chan error) // Wait for errors
-	doneChan := make(chan struct{}) // Unused till shutdown
 	shutdownChan := make(chan os.Signal) // To initiate shutdown
 	// go events.Start()
 	// go metrics.Start()
-	go server.Start(doneChan) // Start the API server in goroutine
+	go server.Start() // Start the API server in goroutine
+
 
 	// ### Shutdown Sequence ###
 	// 1. Stop incoming actions with shutdownChan signal
-	// 2. Wait for currently processing actions (API Server and Database) to complete and send doneChan signal
+	// 2. Wait for currently processing actions (API Server and Database) to complete and send WaitGroup done.
 	// 3. Complete remaining shutdown
 	signal.Notify(shutdownChan, os.Interrupt)
-	select {
-	case err = <-errChan:
-		logger.Errorw("Error in goroutines",
-			"error", err,
-		)
-		asyncCancel()
-	case <-shutdownChan:
-		logger.Infoln("Initiating graceful shutdown")
-		asyncCancel()
+
+	<-shutdownChan
+
+	logger.Infoln("Initiating graceful shutdown")
+	err = server.Stop()
+	if err != nil {
+		logger.Errorln("Failed to stop API server")
+		return exitError
 	}
-	<-doneChan
 	logger.Infoln("Successfully stopped. Exiting")
-	return 0
+	return exitOK
 }
 
 func main() {
-	os.Exit(run())
+	os.Exit(int(run()))
 }
