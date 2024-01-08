@@ -39,11 +39,11 @@ func (pdb *PhraseDatabase) GetPhrase(key string) (phrase.Phrase, error) {
 		"key", key)
 	rawData, err := pdb.database.Get(key)
 	if err != nil {
-		pdb.logger.Errorw("Error getting phrase",
+		pdb.logger.Debugw("Error getting phrase",
 			"error", err,
 			"key", key,
 		)
-		return phrase.Phrase{}, err
+		return phrase.Phrase{}, nil
 	}
 	if rawData == nil {
 		pdb.logger.Debugw("Phrase not found in db",
