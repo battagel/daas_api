@@ -22,9 +22,11 @@ type Server struct {
     Router *gin.Engine
     srv    *http.Server
 	pdb PhraseDatabase
+	certFile string
+	keyFile string
 }
 
-func CreateAPIServer(logger logger.Logger, ctx context.Context, mode string, addr string, pdb PhraseDatabase) (*Server, error) {
+func CreateAPIServer(logger logger.Logger, ctx context.Context, mode, addr, certFile, keyFile string, pdb PhraseDatabase) (*Server, error) {
     // Create a new Gin router
     if mode == "release" {
 		gin.SetMode(gin.ReleaseMode)
@@ -45,12 +47,13 @@ func CreateAPIServer(logger logger.Logger, ctx context.Context, mode string, add
         Router: router,
         srv:    &http.Server{Addr: addr, Handler: router},
         pdb:    pdb,
+		certFile: certFile,
+		keyFile: keyFile,
     }, nil
 }
 
 func (s *Server) Start() {
-    s.srv.Handler = s.Router
-    if err := s.srv.ListenAndServe(); err != http.ErrServerClosed {
+    if err := s.srv.ListenAndServeTLS(s.certFile, s.keyFile); err != http.ErrServerClosed {
         s.logger.Errorw("Server error: %v\n", err)
     }
 }

@@ -11,6 +11,8 @@ type Config struct {
 	LoggerEncoding string `mapstructure:"DAAS_LOGGER_ENCODING"`
 	APIMode        string `mapstructure:"DAAS_API_MODE"`
 	APIAddress     string `mapstructure:"DAAS_API_ADDRESS"`
+	APICert        string `mapstructure:"DAAS_API_CERT"`
+	APIKey         string `mapstructure:"DAAS_API_KEY"`
 	// Backend        string `mapstructure:"DAAS_API_BACKEND"`
 
 	RedisAddress  string `mapstructure:"REDIS_ADDRESS"`

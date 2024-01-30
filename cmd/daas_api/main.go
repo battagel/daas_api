@@ -62,7 +62,7 @@ func run() exitCode {
 	}
 
 	// # API Server #
-	server, err := api.CreateAPIServer(logger, asyncCtx, config.APIMode, config.APIAddress, pdb)
+	server, err := api.CreateAPIServer(logger, asyncCtx, config.APIMode, config.APIAddress, config.APICert, config.APIKey, pdb)
 	if err != nil {
 		logger.Errorw("Error creating API server", err)
 		return exitError
