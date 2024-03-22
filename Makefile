@@ -25,6 +25,12 @@ help:
 build: vendor
 	@$(GO) build -o $(BIN_DIR)/$(NAME) -mod=vendor $(MAIN_LOCATION)
 
+
+## linux: Create a binary for linux
+.PHONY: deploy
+deploy:
+## Copy over config.env, database.go and clone the repo. Launch make run
+
 ## run: Run the binary
 .PHONY: run
 run: build
