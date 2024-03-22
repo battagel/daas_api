@@ -27,6 +27,7 @@ func (s *Server) GetAllPhrases(c *gin.Context) {
 }
 
 func (s *Server) CreatePhrase(c *gin.Context) {
+	key := c.Param("key")
 	var newPhrase phrase.Phrase
 	if err := c.ShouldBindJSON(&newPhrase); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -44,6 +45,11 @@ func (s *Server) CreatePhrase(c *gin.Context) {
 		return
 	}
 
+	if newPhrase.Phrase != key {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Key in URL does not match phrase in JSON"})
+		return
+	}
+
 	err = s.pdb.AddPhrase(newPhrase)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save phrase"})
@@ -51,7 +57,7 @@ func (s *Server) CreatePhrase(c *gin.Context) {
 	}
 
 	// Return a success response
-	c.JSON(http.StatusCreated, gin.H{"message": "Phrase created successfully", "phrase": newPhrase})
+	c.JSON(http.StatusCreated, gin.H{"message": "Phrase created successfully", "return": newPhrase})
 }
 
 func (s *Server) GetPhrase(c *gin.Context) {
@@ -117,7 +123,7 @@ func (s *Server) UpdatePhrase(c *gin.Context) {
 	}
 
 	// Return a success response
-	c.JSON(http.StatusOK, gin.H{"message": "Phrase updated successfully", "phrase": newPhrase})
+	c.JSON(http.StatusOK, gin.H{"message": "Phrase updated successfully", "return": newPhrase})
 }
 
 func (s *Server) DeletePhrase(c *gin.Context) {
