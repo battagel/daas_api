@@ -1,0 +1,81 @@
+# -*- restclient -*-
+
+:base-url = https://localhost:8443
+:ssl-verify = nil
+:headers =  <<
+Content-Type: application/json
+
+# API Testing Examples
+
+## Get all phrases
+GET :base-url/phrase
+:headers
+
+###
+
+:phrase = test
+
+## Get a specific phrase
+GET :base-url/phrase/:phrase
+:headers
+
+###
+
+## Create a new phrase
+POST :base-url/phrase/:phrase
+:headers
+
+{
+  "phrase": "test",
+  "terms": [
+    "HPE"
+  ],
+  "last_update": "2023-12-19 16:12:43",
+  "complexity": 0,
+  "tags": ["test"],
+  "explanations": [
+    {
+      "definition": "test phrase for debug",
+      "tags": ["test"],
+      "code": ["test_t"],
+      "references": [
+        "<a href=https://en.wikipedia.org/wiki/test>Wikipedia link</a>"
+      ],
+      "heat": 3
+    }
+  ]
+}
+
+###
+
+## Update a phrase
+PUT :base-url/phrase/:phrase
+:headers
+
+{
+  "phrase": "test",
+  "terms": [
+    "HPE"
+  ],
+  "last_update": "2023-12-19 16:12:43",
+  "complexity": 0,
+  "tags": [],
+  "explanations": [
+    {
+      "definition": "test phrase for debug",
+      "tags": [],
+      "code": [],
+      "references": [
+        "<a href=https://en.wikipedia.org/wiki/test>Wikipedia link</a>"
+      ],
+      "heat": 0
+    }
+  ]
+}
+
+###
+
+## Delete a phrase
+DELETE :base-url/phrase/:phrase
+
+###
