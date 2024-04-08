@@ -5,7 +5,6 @@ import (
 	"daas_api/pkg/logger"
 	"database/sql"
 	"encoding/json"
-	"errors"
 
 	_ "github.com/golang-migrate/migrate/v4"
 	_ "github.com/mattn/go-sqlite3"
@@ -44,7 +43,18 @@ func CreateSQLite(logger logger.Logger, ctx context.Context, tableName string) (
 		logger.Errorw("Table does not exist",
 			"tableName", tableName,
 		)
-		return nil, nil, errors.New("SQLite table does not exist. Try running '$ make db'")
+		_, err = db.Exec(`CREATE TABLE ` + tableName + ` (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			key TEXT UNIQUE NOT NULL,
+			phrase TEXT NOT NULL
+		)`)
+		if err != nil {
+			logger.Errorw("Failed to create table",
+				"tableName", tableName,
+				"err", err,
+			)
+			return nil, nil, err
+		}
 	}
 
 	return &SQLite{
