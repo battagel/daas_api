@@ -37,7 +37,7 @@ func CreateAPIServer(logger logger.Logger, ctx context.Context, mode, addr, cert
 
 	// Apply CORS middleware
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"https://stackoverflow.com", "http://confluence.eng.nimblestorage.com", "https://rndwiki-pro.its.hpecorp.net"}
+	config.AllowOrigins = []string{"https://stackoverflow.com", "https://confluence.eng.nimblestorage.com", "https://rndwiki-pro.its.hpecorp.net"}
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE"}
 	config.AllowHeaders = []string{"Content-Type", "Authorization"}
 	config.AllowCredentials = true // Allow credentials in cross-origin requests
