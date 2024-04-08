@@ -13,43 +13,53 @@ GET :base-url/phrase
 
 ###
 
-:phrase = test
+:phrase = POST
 
 ## Get a specific phrase
-GET :base-url/phrase/:phrase
+GET :base-url/phrase/POST
 :headers
 
 ###
 
 ## Create a new phrase
-POST :base-url/phrase/:phrase
+POST :base-url/phrase/test
 :headers
 
 {
-  "phrase": "test",
-  "terms": [
-    "HPE"
-  ],
-  "last_update": "2023-12-19 16:12:43",
-  "complexity": 0,
-  "tags": ["test"],
-  "explanations": [
-    {
-      "definition": "test phrase for debug",
-      "tags": ["test"],
-      "code": ["test_t"],
-      "references": [
-        "<a href=https://en.wikipedia.org/wiki/test>Wikipedia link</a>"
-      ],
-      "heat": 3
-    }
-  ]
+    "phrase": "test",
+    "terms": ["HPE", "Test"],
+    "last_update": "2024-03-25 16:02:49",
+    "complexity": 0.4,
+    "topics": ["Test"],
+    "explanations": [
+      {
+        "definition": "Test is a foo that is also a bar",
+        "author": "Matthew Battagel",
+        "tags": ["Test"],
+        "code": ["code_t", "test_t"],
+        "references": [
+          "<a href=https://en.wikipedia.org/wiki/test>Wikipedia link</a>"
+        ],
+        "heat": 3
+      },
+      {
+        "definition": "Test is a foo that is also a bar",
+        "author": "Matthew Battagel",
+        "tags": ["Test"],
+        "code": ["code_t", "test_t"],
+        "references": [
+          "<a href=https://en.wikipedia.org/wiki/test>Wikipedia link</a>"
+        ],
+        "heat": 3
+      }
+    ]
+  }
 }
 
 ###
 
 ## Update a phrase
-PUT :base-url/phrase/:phrase
+PUT :base-url/phrase/test
 :headers
 
 {
@@ -59,7 +69,7 @@ PUT :base-url/phrase/:phrase
   ],
   "last_update": "2023-12-19 16:12:43",
   "complexity": 0,
-  "tags": [],
+  "topic": [],
   "explanations": [
     {
       "definition": "test phrase for debug",
@@ -76,6 +86,6 @@ PUT :base-url/phrase/:phrase
 ###
 
 ## Delete a phrase
-DELETE :base-url/phrase/:phrase
+DELETE :base-url/phrase/test
 
 ###
