@@ -6,6 +6,7 @@ import (
 
 type Explanation struct {
 	Definition string   `json:"definition"`
+	Author     string   `json:"author"`
 	Tags       []string `json:"tags"`
 	Code       []string `json:"code"`
 	References []string `json:"references"`
@@ -17,7 +18,7 @@ type Phrase struct {
 	Terms        []string      `json:"terms"`
 	LastUpdate   string        `json:"last_update"`
 	Complexity   float64       `json:"complexity"`
-	Tags         []string      `json:"tags"`
+	Topics       []string      `json:"topics"`
 	Explanations []Explanation `json:"explanations"`
 }
 
@@ -27,7 +28,7 @@ func (p *Phrase) ToMap() map[string]interface{} {
 	phraseMap["terms"] = p.Terms
 	phraseMap["last_update"] = p.LastUpdate
 	phraseMap["complexity"] = p.Complexity
-	phraseMap["tags"] = p.Tags
+	phraseMap["topics"] = p.Topics
 
 
 	// Convert the Explanation slice to a slice of maps
@@ -35,6 +36,7 @@ func (p *Phrase) ToMap() map[string]interface{} {
 	for i, exp := range p.Explanations {
 		explanationMap := make(map[string]interface{})
 		explanationMap["definition"] = exp.Definition
+		explanationMap["author"] = exp.Author
 		explanationMap["tags"] = exp.Tags
 		explanationMap["code"] = exp.Code
 		explanationMap["references"] = exp.References
@@ -77,7 +79,7 @@ func (p *Phrase) ToPhrase(rawData interface{}) error {
 		}
 
 		// Check and assign "tag" field
-		p.Tags = toStringSlice(data["tags"].([]interface{}))
+		p.Topics = toStringSlice(data["topics"].([]interface{}))
 
 		// Convert the "explanation" field (slice of maps) back to the Explanation struct
 		if expData, ok := data["explanations"].([]interface{}); ok {
@@ -85,6 +87,7 @@ func (p *Phrase) ToPhrase(rawData interface{}) error {
 				if expMap, ok := exp.(map[string]interface{}); ok {
 					explanation := Explanation{
 						Definition: expMap["definition"].(string),
+						Author:     expMap["author"].(string),
 						Tags:       toStringSlice(expMap["tags"].([]interface{})),
 						Code:       toStringSlice(expMap["code"].([]interface{})),
 						References: toStringSlice(expMap["references"].([]interface{})),

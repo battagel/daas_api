@@ -14,11 +14,12 @@ import json
 #         "terms": [""],  // Any search terms to include. This can/should include code variables.
 #         "last_update": "", // For term up-to-date-ness
 #         "complexity": 0.0, // Float. How basic or complex the term. Good for refining search later
-#         "tags": [""], // A better way of filtering words
+#         "topics": [""], // Index for related topics / projects
 #         "explanations": [ // Multiple potential explanations
 #             {
 #                 "definition": "", // Any HTMl text here
-#                 "tags": [""],
+#                 "author": "", // Last author of the explanation
+#                 "tags": [""], // List of tags. This can include code languages, projects, components.
 #                 "code": [""], // List of explanatory code snippets.
 #                 "references": [""], // Multiple references. What about files?
 #                 "heat": 0.0 // Float. Public vote for how accurate / relevant / descriptive the explanation is. List in accuracy order.
@@ -46,12 +47,13 @@ def convert_data(data):
             "terms": ["HPE"],
             "last_update": strftime("%Y-%m-%d %H:%M:%S", gmtime()),
             "complexity": 0.0,
-            "tags": [],
+            "topics": [],
             "explanations": []
         }
         for i, definition in enumerate(item["definitions"]):
             explanation = {
                 "definition": definition,
+                "author": "Matthew Battagel",
                 "tags": [],
                 "code": [],
                 "references": item["references"][i],
