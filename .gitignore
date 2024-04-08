@@ -11,3 +11,6 @@ tmp/
 /mocks/*.go
 /data_processing/
 *.db
+*.http
+*.pem
+*.http
